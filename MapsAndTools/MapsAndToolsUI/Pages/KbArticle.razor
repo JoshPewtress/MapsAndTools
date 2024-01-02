@@ -1,0 +1,87 @@
+﻿@page "/KbArticle"
+@inject IKbArticleData kbData
+
+<div class="container-fluid">
+	<Header />
+
+	<div class="row fdc-header text-center align-items-center d-flex flex-column">
+		<div class="col">
+			<h1 class="mb-0">Knowledgebase Articles</h1>
+		</div>
+		<div class="col justify-content-end search-div">
+			<input type="text" placeholder="Search" aria-label="Search Box" class="form-control search-box"
+				   @oninput="((txt) => OnSearchInput((string)txt.Value))"
+				   @onkeyup="((keyEvent) => OnKeyDown(keyEvent))" />
+		</div>
+	</div>
+
+	<div class="row">
+		<div class="col">
+			<table class="table table-bordered kb-table">
+				<thead>
+					<tr class="text-uppercase text-center kb-table-headers">
+						<th class="px-3">KB Number</th>
+						<th>Subject</th>
+						<th>LOB</th>
+					</tr>
+				</thead>
+				<tbody>
+					@foreach (var kb in kbArticles)
+					{
+						<tr class="px-3 kb-table-data">
+							<td>@kb.KbNumber</td>
+							<td>@kb.Subject</td>
+							<td>@kb.LineOfBusiness</td>
+						</tr>
+					}
+				</tbody>
+			</table>
+		</div>
+	</div>
+</div>
+
+@code {
+	private List<KbArticleModel> kbArticles = new();
+	private string searchText = "";
+
+	protected override async Task OnInitializedAsync()
+	{
+		kbArticles = await kbData.GetAllArticles();
+	}
+
+	private async Task OnSearchInput(string searchInput)
+	{
+		searchText = searchInput;
+		await FilterKbs();
+	}
+
+	private async Task FilterKbs()
+	{
+
+		var filteredKbs = await kbData.GetAllArticles();
+
+		if (!string.IsNullOrWhiteSpace(searchText))
+		{
+			filteredKbs = filteredKbs.Where(
+				k => k.KbNumber.Contains(searchText, StringComparison.InvariantCultureIgnoreCase) ||
+				k.Subject.Contains(searchText, StringComparison.InvariantCultureIgnoreCase) ||
+				k.LineOfBusiness.Contains(searchText, StringComparison.InvariantCultureIgnoreCase)
+			).ToList();
+		}
+		else
+		{
+			filteredKbs = await kbData.GetAllArticles();
+		}
+
+		kbArticles = filteredKbs;
+	}
+
+	private async Task OnKeyDown(KeyboardEventArgs keyEvent)
+	{
+		if (keyEvent.Key == "Backspace")
+		{
+			searchText = searchText.Length > 0 ? searchText.Substring(0, searchText.Length - 1) : "";
+			await OnSearchInput(searchText);
+		}
+	}
+}

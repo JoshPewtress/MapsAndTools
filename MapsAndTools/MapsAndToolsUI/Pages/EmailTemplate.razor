@@ -1,0 +1,97 @@
+﻿@page "/EmailTemplate"
+@inject ITemplateData templateData
+
+<div class="container-fluid">
+	<Header />
+	<div class="row fdc-header text-center align-items-center d-flex flex-column">
+		<div class="col">
+			<h1 class="mb-0">Email Templates</h1>
+		</div>
+		<div class="col justify-content-end search-div">
+			<input type="text" placeholder="Search" aria-label="Search Box" class="form-control search-box"
+				   @oninput="((txt) => OnSearchInput((string)txt.Value))"
+				   @onkeyup="((keyEvent) => OnKeyDown(keyEvent))" />
+		</div>
+	</div>
+
+	@if (templateModels is not null)
+	{
+		<div class="row">
+			@foreach (var t in templateModels)
+			{
+				<div class="template-body dark text-light col-9">
+					<div class="template-title">
+						<strong><em>@t.Title</em></strong>
+						<div class="copy-clipboard d-flex flex-column cursor-pointer" @onclick="(() => CopyToClipboard(t))">
+							<span class="clipboard-small">Click to Copy</span>
+							<div class="oi oi-clipboard"></div>
+						</div>
+					</div>
+					<div class="template-bar" />
+					<div class="template-contents row">
+						<div class="template-contents-body col">
+							@t.Body.Substring(0, 100)
+						</div>
+						@if (t.Note is not null)
+						{
+							<div class="template-contents-note col-2">
+								<p>Note Included</p>
+							</div>
+						}
+					</div>
+				</div>
+			}
+		</div>
+	}
+</div>
+
+@code {
+	private List<TemplateModel> templateModels = new();
+	private string searchText = "";
+
+	protected override async Task OnInitializedAsync()
+	{
+		templateModels = await templateData.GetAllTemplates();
+	}
+
+	private async Task OnSearchInput(string searchInput)
+	{
+		searchText = searchInput;
+		await FilterFdcs();
+	}
+
+	private async Task FilterFdcs()
+	{
+
+		var filteredTemplates = await templateData.GetAllTemplates();
+
+		if (!string.IsNullOrWhiteSpace(searchText))
+		{
+			filteredTemplates = filteredTemplates.Where(
+				t => t.Title.Contains(searchText, StringComparison.InvariantCultureIgnoreCase)
+			).ToList();
+		}
+		else
+		{
+			filteredTemplates = await templateData.GetAllTemplates();
+		}
+
+		templateModels = filteredTemplates;
+	}
+
+	private async Task OnKeyDown(KeyboardEventArgs keyEvent)
+	{
+		if (keyEvent.Key == "Backspace")
+		{
+			searchText = searchText.Length > 0 ? searchText.Substring(0, searchText.Length - 1) : "";
+			await OnSearchInput(searchText);
+		}
+	}
+
+	private async Task CopyToClipboard(TemplateModel template)
+	{
+		var textToCopy = $"{template.SubjectLine}\n\n{template.Body}\n\n{template.Note ?? string.Empty}";
+
+		await TextCopy.ClipboardService.SetTextAsync(textToCopy);
+	}
+}

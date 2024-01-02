@@ -1,0 +1,52 @@
+﻿@page "/Add"
+@inject ICallFlowData callFlowData
+@inject NavigationManager navManager
+
+@if (callFlows is not null)
+{
+	<div>
+		<label for="child-call-flow">Child Call Flow</label>
+		<select id="child-call-flow" @bind="childCallFlowId">
+			<option value="">-- Select Child Call Flow --</option>
+			@foreach (var childCallFlow in callFlows)
+			{
+				<option value="@childCallFlow.Id">@childCallFlow.Title</option>
+			}
+		</select>
+	</div>
+
+	<div>
+		<label for="parent-call-flow">Parent Call Flow</label>
+		<select id="parent-call-flow" @bind="parentCallFlowId">
+			<option value="">-- Select Parent Call Flow --</option>
+			@foreach (var parentCallFlow in callFlows)
+			{
+				<option value="@parentCallFlow.Id">@parentCallFlow.Title</option>
+			}
+		</select>
+	</div>
+
+	<button class="btn btn-success" type="submit" @onclick="AddChildStep">Submit Changes</button>
+}
+
+
+
+@code {
+	private List<CallFlowModel> callFlows = new();
+	private string parentCallFlowId;
+	private string childCallFlowId;
+
+	protected override async Task OnInitializedAsync()
+	{
+		callFlows = await callFlowData.GetAllCallFlows();
+	}
+
+	private async Task AddChildStep()
+	{
+		var childStep = await callFlowData.GetCallFlow(childCallFlowId);
+
+		await callFlowData.AddChildStep(parentCallFlowId, childStep);
+
+		navManager.NavigateTo("/");
+	}
+}

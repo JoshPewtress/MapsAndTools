@@ -1,0 +1,99 @@
+﻿@page "/FdcList"
+@inject IFdcData fdcData
+@inject NavigationManager navManager
+
+<div class="container-fluid">
+	<Header />
+	
+	<div class="row fdc-header text-center align-items-center d-flex flex-column">
+		<div class="col">
+			<h1 class="mb-0">Delivery Centers</h1>
+		</div>
+		<div class="col justify-content-end search-div">
+			<input type="text" placeholder="Search" aria-label="Search Box" class="form-control search-box"
+				   @oninput="((txt) => OnSearchInput((string)txt.Value))" 
+				   @onkeyup="((keyEvent) => OnKeyDown(keyEvent))"/>
+		</div>
+	</div>
+
+	<div class="row">
+		@if (allFdcs is not null)
+		{
+			@foreach (var fdc in allFdcs)
+			{
+				<div class="col-4">
+					<div class="card text-uppercase dark text-light m-2 fdc-card">
+						<div class="card-body text-center">
+							<strong>@fdc.FdcName</strong>
+							<br />
+							<em>@fdc.FdcId</em>
+							<div class="fdc-card-bar mx-auto"></div>
+							<div class="mt-3 text-center">
+								<strong>Phone #:</strong>
+								<strong class="px-3">@fdc.FdcPhoneNumber</strong>
+							</div>
+							@if (fdc.EscalationPhoneNumbers != null && fdc.EscalationPhoneNumbers.Any())
+							{
+								<input type="checkbox" class="expand-checkbox" id="@($"expand-{fdc.FdcId}")">
+								<label for="@($"expand-{fdc.FdcId}")" class="btn btn-primary mt-3">
+									Show Escalation Numbers
+								</label>
+								<div class="expand-content mt-3">
+									@foreach (var phone in fdc.EscalationPhoneNumbers)
+									{
+										<p>@phone</p>
+									}
+								</div>
+							}
+						</div>
+					</div>
+				</div>
+			}
+		}
+	</div>
+</div>
+
+@code {
+	private List<FdcModel> allFdcs = new();
+	private string searchText = "";
+
+	protected override async Task OnInitializedAsync()
+	{
+		allFdcs = await fdcData.GetAllFdcs();
+	}
+
+	private async Task OnSearchInput(string searchInput)
+	{
+		searchText = searchInput;
+		await FilterFdcs();
+	}
+
+	private async Task FilterFdcs()
+	{
+
+		var filteredFdcs = await fdcData.GetAllFdcs();
+
+		if (!string.IsNullOrWhiteSpace(searchText))
+		{
+			filteredFdcs = filteredFdcs.Where(
+				f => f.FdcId.Contains(searchText, StringComparison.InvariantCultureIgnoreCase) ||
+				f.FdcName.Contains(searchText, StringComparison.InvariantCultureIgnoreCase)
+			).ToList();
+		}
+		else
+		{
+			filteredFdcs = await fdcData.GetAllFdcs();
+		}
+
+		allFdcs = filteredFdcs;
+	}
+
+	private async Task OnKeyDown(KeyboardEventArgs keyEvent)
+	{
+		if (keyEvent.Key == "Backspace")
+		{
+			searchText = searchText.Length > 0 ? searchText.Substring(0, searchText.Length - 1) : "";
+			await OnSearchInput(searchText);
+		}
+	}
+}

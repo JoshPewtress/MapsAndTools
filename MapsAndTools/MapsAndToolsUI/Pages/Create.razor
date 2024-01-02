@@ -1,0 +1,70 @@
+﻿@page "/CreateCallFlow"
+@inject ICallFlowData callFlowData
+@inject NavigationManager navManager
+
+<div class="container-fluid">
+    <Header />
+    <div class="row create-form">
+        <div class="col-xl-8 col-lg-10">
+            <EditForm Model="@newCallFlow" OnValidSubmit="CreateCallFlow">
+                <DataAnnotationsValidator />
+
+                <ValidationSummary />
+
+                <div class="form-group">
+                    <label class="create-form-label" for="newCallFlow.CallType">Call Type</label>
+                    <select id="newCallFlow.CallType" @bind="newCallFlow.CallType">
+                        <option value="">-- Select A Call Type --</option>
+                        @foreach (var value in Enum.GetValues(typeof(CallTypeModel.CallType)))
+                        {
+                            var displayName = ((Enum)value).GetDisplayName();
+                            <option value="@value">@displayName</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="create-form-label" for="newCallFlow.Title">Title</label>
+                    <InputText id="newCallFlow.Title" @bind-Value="newCallFlow.Title" />
+                </div>
+
+                <div class="form-group">
+                    <label class="create-form-label" for="newCallFlow.Description">Description</label>
+                    <InputTextArea id="newCallFlow.Description" @bind-Value="newCallFlow.Description" />
+                </div>
+
+                <div class="form-group">
+                    <label class="create-form-label" for="parentCallFlowId">Parent CallFlow</label>
+                    <select id="parentCallFlowId" @bind="parentCallFlowId">
+                        <option value="">-- Select Parent CallFlow --</option>
+                        @foreach (var parentCallFlow in parentCallFlows)
+                        {
+                            <option value="@parentCallFlow.Id">@parentCallFlow.Title</option>
+                        }
+                    </select>
+                </div>
+
+                <button type="submit">Create CallFlow</button>
+            </EditForm>
+        </div>
+    </div>
+</div>
+
+@code {
+    private CallFlowModel newCallFlow = new CallFlowModel();
+    private List<CallFlowModel> parentCallFlows = new List<CallFlowModel>();
+    private string parentCallFlowId;
+
+    protected override async Task OnInitializedAsync()
+    {
+        parentCallFlows = await callFlowData.GetAllCallFlows();
+    }
+
+    private async Task CreateCallFlow()
+    {
+        newCallFlow.ParentId = parentCallFlowId;
+        await callFlowData.CreateCallFlow(newCallFlow);
+
+        navManager.NavigateTo("/"); // Redirect to the list of call flows or another page
+    }
+}

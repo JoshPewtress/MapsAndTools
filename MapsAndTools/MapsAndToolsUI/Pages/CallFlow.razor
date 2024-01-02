@@ -1,0 +1,164 @@
+﻿@page "/CallFlow"
+@inject ICallFlowData callFlowData
+
+<div class="container-fluid">
+    <Header />
+
+    <div class="row mt-2">
+        <div class="col-3 flows">
+            @if (callFlows is not null)
+            {
+                <h3 class="call-type-header">Call Types</h3>
+                @foreach (var parent in callFlows.Where(c => c.Title == "Damaged Product" || c.Title == "Missing Product" || c.Title == "Order Status" || c.Title == "Order Changes"))
+                {
+                    <div>
+                        <button class="btn parent-button" @onclick="(() => ToggleIsActive(parent))">@parent.Title</button>
+
+                        @if (parent.IsActive && parent.ChildSteps.Count > 0)
+                        {
+                            @foreach (var child in parent.ChildSteps)
+                            {
+                                <div>
+                                    <button class="btn child-button" @onclick="(() => ToggleChildIsActive(parent, child))">@child.Title</button>
+
+                                    @if (child.IsActive && child.ChildSteps.Count > 0)
+                                    {
+                                        @foreach (var grandChild in child.ChildSteps)
+                                        {
+                                            <div>
+                                                <button class="btn grandchild-button" @onclick="(() => ToggleGrandChildIsActive(child, grandChild))">@grandChild.Title</button>
+                                            </div>
+                                        }
+                                    }
+                                </div>
+                            }
+                        }
+                    </div>
+                }
+            }
+        </div>
+
+        <div class="col solution">
+            <section>
+                <div class="container py-4">
+                    <h1 class="h1-card text-center" id="cardHeaderTitle">Solution</h1>
+
+                    <article class="postcard dark blue">
+                        <a class="postcard-img-link">
+                            <img class="postcard-img" src="images/SolutionPicture.jpg" alt="Image Title" />
+                        </a>
+                        <div class="postcard-text">
+                            @if (currentModel is not null)
+                            {
+                                <h1 class="postcard-title blue">
+                                    <a>@currentModel.Title</a>
+                                </h1>
+                                <div class="postcard-bar"></div>
+                                <div class="postcard-preview-txt">@currentModel.Description</div>
+                            }
+                            else
+                            {
+                                <h1 class="postcard-title blue">
+                                    <a>Select a call type</a>
+                                </h1>
+                                <div class="postcard-bar"></div>
+                                <div class="postcard-preview-txt">This will fill in with the process to take to finish the call</div>
+                            }
+                        </div>
+                    </article>
+                </div>
+            </section>
+        </div>
+    </div>
+</div>
+
+@code {
+    private List<CallFlowModel> callFlows;
+    private CallFlowModel currentModel;
+
+    protected override async Task OnInitializedAsync()
+    {
+        callFlows = await callFlowData.GetAllCallFlows();
+    }
+
+    private void ToggleIsActive(CallFlowModel parent)
+    {
+        currentModel = parent;
+
+        foreach (var flow in callFlows)
+        {
+            if (flow == parent)
+            {
+                flow.IsActive = !flow.IsActive;
+            }
+            else
+            {
+                flow.IsActive = false;
+            }
+        }
+    }
+
+    private void ToggleChildIsActive(CallFlowModel parent, CallFlowModel child)
+    {
+        currentModel = child;
+
+        foreach (var flow in parent.ChildSteps)
+        {
+            if (flow == child)
+            {
+                flow.IsActive = !flow.IsActive;
+            }
+            else
+            {
+                flow.IsActive = false;
+            }
+        }
+
+        // Set IsActive to false for all other parents
+        foreach (var otherParent in callFlows.Where(p => p != parent))
+        {
+            otherParent.IsActive = false;
+            foreach (var grandChild in otherParent.ChildSteps)
+            {
+                grandChild.IsActive = false;
+            }
+        }
+    }
+
+    private void ToggleGrandChildIsActive(CallFlowModel child, CallFlowModel grandChild)
+    {
+        currentModel = grandChild;
+
+        foreach (var flow in child.ChildSteps)
+        {
+            if (flow == grandChild)
+            {
+                flow.IsActive = !flow.IsActive;
+            }
+            else
+            {
+                flow.IsActive = false;
+            }
+        }
+
+        // Set IsActive to false for all other parents and their children
+        foreach (var parent in callFlows)
+        {
+            if (parent.ChildSteps.Contains(child))
+            {
+                foreach (var otherChild in parent.ChildSteps.Where(c => c != child))
+                {
+                    otherChild.IsActive = false;
+                }
+            }
+            else
+            {
+                parent.IsActive = false;
+                foreach (var otherChild in parent.ChildSteps)
+                {
+                    otherChild.IsActive = false;
+                }
+            }
+        }
+    }
+}

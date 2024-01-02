@@ -1,0 +1,38 @@
+﻿@inject NavigationManager navManager
+
+<div class="row maps-header">
+    <div class="col-12">
+        <h1 class="cursor-pointer" @onclick="(() => LoadHomePage())">Maps and Tools</h1>
+        <div class="oi oi-external-link" />
+    </div>
+</div>
+<div class="row maps-nav text-center cursor-pointer">
+    @NavLink("Call Flow", "/CallFlow", LoadPage)
+    @NavLink("FDC List", "/FdcList", LoadPage)
+    @NavLink("Templates", "/EmailTemplate", LoadPage)
+    @NavLink("KB Articles", "/KbArticle", LoadPage)
+</div>
+
+@code {
+    private void LoadPage(string pageUrl)
+    {
+        navManager.NavigateTo(pageUrl);
+    }
+
+    private void LoadHomePage()
+    {
+        navManager.NavigateTo("/");
+    }
+
+    private RenderFragment NavLink(string text, string href, Action<string> onClick)
+    {
+        return builder =>
+        {
+            builder.OpenElement(0, "div");
+            builder.AddAttribute(1, "class", "col");
+            builder.AddAttribute(2, "onclick", EventCallback.Factory.Create(this, () => onClick.Invoke(href)));
+            builder.AddContent(3, $"{text}");
+            builder.CloseElement();
+        };
+    }
+}

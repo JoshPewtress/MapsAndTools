@@ -1,0 +1,64 @@
+﻿@page "/"
+@inject IDailyExpectationsData dailyExpectationsData
+
+<PageTitle>Maps And Tools</PageTitle>
+
+<div class="container-fluid">
+	<Header />
+	<div class="row">
+		<div class="col-xxl-9 col-xl-8 col-lg-7">
+			<embed src="" 
+				class="weekly-video" id="weeklyVideo" />
+		</div>
+		<div class="col-xxl-3 col-xl-4 col-lg-5">
+			<div class="daily-expectations text-center">
+				<div>
+					<h3 class="pt-3">Daily Expectations</h3>
+				</div>
+				<div class="daily-expectations-bar"></div>
+				<div>
+					@if (expectations is not null)
+					{
+						@foreach (var e in expectations)
+						{
+							<div class="daily-expectations-titles mb-1" @onclick="(() => OnExpectationClick(e))">@e.Expectation</div>
+						}
+						<div class="daily-expectations-bar"></div>
+					}
+					<div>
+						@if (expectationContents is not null)
+						{
+							@foreach (var s in expectationContents)
+							{
+								<div class="daily-expectations-content">
+									<div>@s</div>
+								</div>
+							}
+						}
+						else
+						{
+							<p class="mt-3">Click an expectation to see its contents.</p>
+						}
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+@code {
+	private List<DailyExpectationModel> expectations;
+	private List<string> expectationContents;
+
+	private string selectedExpectation = "";
+
+	protected async override Task OnInitializedAsync()
+	{
+		expectations = await dailyExpectationsData.GetAllExpectations();
+	}
+
+	private void OnExpectationClick(DailyExpectationModel expectation)
+	{
+		expectationContents = expectation.Contents.ToList();
+	}
+}
