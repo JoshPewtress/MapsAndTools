@@ -1,0 +1,27 @@
+﻿@inject NavigationManager navManager
+
+<div>
+	<div>
+		<div>
+			<div>
+				<div>Authorization Required</div>
+				<p>
+					You are not authorized to view this page. If you have just signed up and require access to the Maps and Tools, please contact your supervisor to request access.
+				</p>
+				<p>
+					You must be signed in to Access this site.
+				</p>
+			</div>
+			<div>
+				<button type="button" @onclick="ClosePage">Return to Home Page</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+@code {
+	private void ClosePage()
+	{
+		navManager.NavigateTo("/");
+	}
+}
