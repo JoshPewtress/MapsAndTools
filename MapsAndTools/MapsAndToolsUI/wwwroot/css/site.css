@@ -11,7 +11,7 @@ body {
     position: relative;
     margin: 0;
     padding: 0;
-    height: 100vh;
+    height: 100%;
 }
 
     body::before {
@@ -141,7 +141,7 @@ a, .btn-link {
     .daily-expectations-bar {
         width: 200px;
         height: 10px;
-        margin: 1rem auto;
+        margin: .8rem auto;
         border-radius: 5px;
         background-color: #FFFFFF;
         transition: width 0.2s ease;
@@ -169,7 +169,7 @@ a, .btn-link {
     }
 
         .daily-expectations-content div {
-            margin-top: 1rem;
+            margin-top: .5rem;
             display: flex;
             align-items: baseline;
             text-align: left;
@@ -501,4 +501,11 @@ a, a:hover {
 .table-bordered > tbody > tr:nth-of-type(odd) {
     background-color: #FFFFFF;
     color: #18151f;
+}
+
+@media screen and (max-height: 980px) {
+    
+    .weekly-video {
+        max-height: 700px;
+    }
 }

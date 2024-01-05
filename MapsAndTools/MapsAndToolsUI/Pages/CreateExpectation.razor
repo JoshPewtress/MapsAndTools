@@ -1,0 +1,52 @@
+﻿@page "/CreateExpectation"
+@inject NavigationManager navManager
+@inject IDailyExpectationsData expectationsData
+
+<div class="container-fluid">
+    <Header />
+    <div class="row create-form">
+        <div class="col-xl-8 col-lg-10">
+            <EditForm Model="@model" OnValidSubmit="CreateNewExpectation">
+                <DataAnnotationsValidator />
+
+                <ValidationSummary />
+
+                <div class="form-group">
+                    <label class="create-form-label" for="model.Expectation">Expectation Name</label>
+                    <InputText id="model.Expectation" @bind-Value="model.Expectation" />
+                </div>
+
+                <div class="form-group">
+                    <label class="create-form-label" for="contentInput">Contents</label>
+                    <InputTextArea id="contentInput" @bind-Value="contentInput" />
+                    <button type="button" @onclick="AddContent">Add Content</button>
+                </div>
+
+                <button type="submit">Create Expectation</button>
+            </EditForm>
+        </div>
+    </div>
+</div>
+
+@code {
+    private DailyExpectationModel model = new();
+    private string contentInput;
+
+    private void AddContent()
+    {
+        if (model.Contents == null)
+        {
+            model.Contents = new();
+        }
+
+        model.Contents.Add(contentInput);
+        contentInput = string.Empty;
+    }
+
+	private async Task CreateNewExpectation()
+	{
+		await expectationsData.CreateExpectation(model);
+
+		navManager.NavigateTo("/");
+	}
+}

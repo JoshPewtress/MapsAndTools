@@ -8,7 +8,7 @@ public class DbConnection : IDbConnection
 {
 	private readonly IConfiguration _config;
 	private readonly IMongoDatabase _db;
-	private string _connectionId = "MongoDB";
+	private string _connectionId = "Cosmos";
 	public string DbName { get; private set; }
 	public string CallFlowCollectionName { get; private set; } = "callflows";
 	public string FdcCollectionName { get; private set; } = "fdcs";
