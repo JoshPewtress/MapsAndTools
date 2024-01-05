@@ -1,4 +1,5 @@
 ﻿@page "/KbArticle"
+@attribute [Authorize(Policy = "TeamMember")]
 @inject IKbArticleData kbData
 
 <div class="container-fluid">

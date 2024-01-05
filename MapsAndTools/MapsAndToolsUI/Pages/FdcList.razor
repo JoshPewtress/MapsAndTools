@@ -1,4 +1,5 @@
 ﻿@page "/FdcList"
+@attribute [Authorize(Policy = "TeamMember")]
 @inject IFdcData fdcData
 @inject NavigationManager navManager
 

@@ -1,4 +1,5 @@
 ﻿@page "/CreateCallFlow"
+@attribute [Authorize(Policy = "Admin")]
 @inject ICallFlowData callFlowData
 @inject NavigationManager navManager
 

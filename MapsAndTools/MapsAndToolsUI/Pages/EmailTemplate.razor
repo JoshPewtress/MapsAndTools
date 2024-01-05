@@ -1,4 +1,5 @@
 ﻿@page "/EmailTemplate"
+@attribute [Authorize(Policy = "TeamMember")]
 @inject ITemplateData templateData
 
 <div class="container-fluid">

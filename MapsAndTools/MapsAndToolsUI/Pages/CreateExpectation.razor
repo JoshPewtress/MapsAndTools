@@ -1,4 +1,5 @@
 ﻿@page "/CreateExpectation"
+@attribute [Authorize(Policy = "Admin")]
 @inject NavigationManager navManager
 @inject IDailyExpectationsData expectationsData
 

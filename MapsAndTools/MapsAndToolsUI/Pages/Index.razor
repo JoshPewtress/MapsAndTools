@@ -1,4 +1,5 @@
 ﻿@page "/"
+@attribute [Authorize(Policy = "TeamMember")]
 @inject IDailyExpectationsData dailyExpectationsData
 
 <PageTitle>Maps And Tools</PageTitle>

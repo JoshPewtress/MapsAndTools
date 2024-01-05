@@ -1,4 +1,5 @@
 ﻿@page "/CallFlow"
+@attribute [Authorize(Policy = "TeamMember")]
 @inject ICallFlowData callFlowData
 
 <div class="container-fluid">
